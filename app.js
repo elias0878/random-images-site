@@ -82,7 +82,9 @@
   }
 
   const withVersion = (path) =>
-    path + (path.includes('?') ? '&' : '?') + 'v=' + VERSION;
+    path.startsWith('data:')
+      ? path
+      : path + (path.includes('?') ? '&' : '?') + 'v=' + VERSION;
 
   /* ---------- 3) العرض ---------- */
 
