@@ -1,5 +1,9 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* مهم: أي عنصر يحمل خاصية hidden يجب أن يختفي فعلاً.
+   بدون هذه القاعدة يتغلّب display:grid/flex على hidden وتبقى دائرة الانتظار ظاهرة. */
+[hidden] { display: none !important; }
+
 :root {
   --bg: #0b0d12;
   --bg2: #12151d;

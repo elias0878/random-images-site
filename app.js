@@ -30,7 +30,10 @@
     msg.className = 'msg' + (kind ? ' ' + kind : '');
   };
 
-  const spinner = (on) => { loader.hidden = !on; };
+  const spinner = (on) => {
+    loader.hidden = !on;
+    loader.style.display = on ? 'grid' : 'none';   // تأكيد إضافي (احتياط)
+  };
 
   const baseName = (path) =>
     decodeURIComponent((path.split('/').pop() || '')).replace(/\.[^.]+$/, '');
@@ -103,6 +106,8 @@
     pre.onload = () => {
       img.src = pre.src;
       img.alt = baseName(path);
+      // نُخفي دائرة الانتظار فور ظهور الصورة (وأيضاً عند اكتمال رسمها فعلياً)
+      img.onload = () => spinner(false);
       spinner(false);
       meta.textContent = baseName(path) + ' — (' + (i + 1) + ' من ' + images.length + ')';
       resetButton('صورة أخرى');

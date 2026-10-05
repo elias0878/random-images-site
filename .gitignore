@@ -17,3 +17,7 @@ desktop.ini
 
 # النسخ الأصلية للصور قبل التحسين
 images_original/
+
+# ملفات بايثون المؤقتة
+__pycache__/
+*.pyc
