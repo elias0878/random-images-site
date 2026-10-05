@@ -5,7 +5,8 @@
   "description": "موقع بسيط: زر واحد يفتح صورة عشوائية من مجلد images",
   "type": "module",
   "scripts": {
-    "build": "node scripts/build-index.mjs",
+    "build": "node scripts/build.mjs",
+    "index": "node scripts/build-index.mjs",
     "start": "node scripts/serve.mjs",
     "dev": "node scripts/build-index.mjs && node scripts/serve.mjs"
   },
