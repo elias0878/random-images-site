@@ -1,0 +1,134 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0b0d12;
+  --bg2: #12151d;
+  --line: #232838;
+  --txt: #eef1f7;
+  --muted: #8b93a7;
+  --acc: #4f8cff;
+  --acc2: #8b5cf6;
+  --ok: #34d399;
+}
+
+html, body { height: 100%; }
+
+body {
+  font-family: "Segoe UI", Tahoma, system-ui, -apple-system, "Noto Kufi Arabic", sans-serif;
+  color: var(--txt);
+  background:
+    radial-gradient(900px 480px at 80% -10%, rgba(139, 92, 246, .18), transparent 60%),
+    radial-gradient(800px 460px at 10% 0%, rgba(79, 140, 255, .16), transparent 60%),
+    linear-gradient(180deg, var(--bg2), var(--bg));
+  background-attachment: fixed;
+  min-height: 100%;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 48px 18px 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  text-align: center;
+}
+
+.head { display: flex; flex-direction: column; gap: 8px; }
+
+.title {
+  font-size: clamp(24px, 5vw, 36px);
+  font-weight: 800;
+  letter-spacing: .5px;
+  background: linear-gradient(90deg, var(--acc), var(--acc2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.sub { color: var(--muted); font-size: clamp(13px, 2.6vw, 15px); }
+
+/* ===== الزر ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 34px;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-size: clamp(16px, 3.4vw, 19px);
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--acc), var(--acc2));
+  box-shadow: 0 10px 30px -8px rgba(79, 140, 255, .6);
+  transition: transform .16s ease, box-shadow .16s ease, filter .16s ease;
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 16px 38px -8px rgba(139, 92, 246, .65); }
+.btn:active { transform: translateY(0) scale(.98); }
+.btn:focus-visible { outline: 3px solid #fff5; outline-offset: 3px; }
+.btn[disabled] { filter: grayscale(.5) brightness(.8); cursor: wait; }
+
+.btn-ico { font-size: 1.15em; line-height: 1; }
+
+/* ===== منطقة الصورة ===== */
+.stage {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.frame {
+  position: relative;
+  width: 100%;
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, .03);
+  padding: 10px;
+  overflow: hidden;
+  animation: pop .28s ease;
+}
+
+@keyframes pop { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+.img {
+  display: block;
+  max-width: 100%;
+  max-height: 68vh;
+  width: auto;
+  height: auto;
+  border-radius: 12px;
+  background: #0e1118;
+}
+
+.img.hide { display: none; }
+
+.meta { color: var(--muted); font-size: 13px; }
+
+/* ===== التحميل ===== */
+.loader { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(11, 13, 18, .6); }
+.loader span {
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 3px solid #ffffff22; border-top-color: var(--acc);
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== الرسائل ===== */
+.msg { color: var(--muted); font-size: 14px; min-height: 20px; }
+.msg.err { color: #ff8a8a; }
+.msg.ok { color: var(--ok); }
+
+@media (max-width: 480px) {
+  .wrap { padding: 32px 14px 48px; gap: 18px; }
+  .frame { padding: 8px; border-radius: 14px; }
+  .img { max-height: 60vh; }
+}

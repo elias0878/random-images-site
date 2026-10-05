@@ -1,0 +1,15 @@
+# ملفات مؤقتة
+node_modules/
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+.vercel
+.env
+.env.*
+
+# كاش المضغوطات
+*.zip
+*.rar
+*.7z
+!images/**

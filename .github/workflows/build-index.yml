@@ -1,0 +1,38 @@
+name: تحديث قائمة الصور
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'images/**'
+      - 'scripts/build-index.mjs'
+      - '.github/workflows/build-index.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-index:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: إنشاء images.json
+        run: node scripts/build-index.mjs
+
+      - name: حفظ التغييرات
+        run: |
+          if [ -z "$(git status --porcelain images.json)" ]; then
+            echo "لا يوجد تغيير في images.json"
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add images.json
+          git commit -m "تحديث تلقائي لقائمة الصور [skip ci]"
+          git push

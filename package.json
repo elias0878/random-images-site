@@ -1,0 +1,15 @@
+{
+  "name": "random-images-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "موقع بسيط: زر واحد يفتح صورة عشوائية من مجلد images",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-index.mjs",
+    "start": "node scripts/serve.mjs",
+    "dev": "node scripts/build-index.mjs && node scripts/serve.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>صور عشوائية</title>
+  <meta name="description" content="زر واحد يفتح لك صورة عشوائية" />
+  <meta name="theme-color" content="#0b0d12" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='78' font-size='80'%3E%F0%9F%96%BC%EF%B8%8F%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="wrap">
+
+    <header class="head">
+      <h1 class="title">صور عشوائية</h1>
+      <p class="sub">اضغط الزر لتظهر لك صورة عشوائية</p>
+    </header>
+
+    <button id="openBtn" class="btn" type="button">
+      <span class="btn-ico" aria-hidden="true">🖼️</span>
+      <span id="btnText">فتح الصورة</span>
+    </button>
+
+    <section id="stage" class="stage" hidden>
+      <div class="frame">
+        <img id="img" class="img" alt="صورة عشوائية" decoding="async" />
+        <div id="loader" class="loader" hidden><span></span></div>
+      </div>
+      <p id="meta" class="meta"></p>
+    </section>
+
+    <p id="msg" class="msg" role="status" aria-live="polite"></p>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
