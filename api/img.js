@@ -18,7 +18,9 @@ const ALLOWED_HOSTS = new Set([
   // ويكيميديا كومنز
   'upload.wikimedia.org',
   'commons.wikimedia.org',
-  'thumb.wikimedia.org'
+  'thumb.wikimedia.org',
+  // Openverse (صور برخص مشاع إبداعي)
+  'api.openverse.org'
 ]);
 
 const MAX_BYTES = 6 * 1024 * 1024;   // حد أقصى لحجم الصورة

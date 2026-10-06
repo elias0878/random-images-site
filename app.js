@@ -14,8 +14,10 @@
     avoidRepeat: true,
     allowEmergencyImage: true,
     picsum: { pages: 10, limitPerPage: 100, width: 1200, height: 750, format: 'jpg', cacheHours: 12 },
+    openverse: { queries: [], pageSize: 20, pagesPerQuery: 1, license: '', useThumbnail: true, cacheHours: 24 },
     wikimedia: { width: 1200, limitPerPage: 50, roundsPerCategory: 3, cacheHours: 12, categories: [] },
-    folder: { indexFile: 'images.json' }
+    folder: { indexFile: 'images.json' },
+    ai: { style: '', width: 1200, height: 750, negativePrompt: '', prompts: [] }
   };
 
   const CFG = merge(DEFAULTS, window.SITE_CONFIG || {});
@@ -41,7 +43,7 @@
   const msg    = document.getElementById('msg');
 
   /* ---------- الحالة ---------- */
-  let items = [];          // [{ url, credit }]
+  let items = [];          // [{ url, credit, live? }]
   let lastIndex = -1;
   let busy = false;
   let ready = false;
@@ -74,16 +76,18 @@
 
   /** نطاقات المصادر المسموح بها في التمرير */
   const ALLOWED_HOSTS = [
+    // Picsum (صور Unsplash)
     'picsum.photos', 'fastly.picsum.photos', 'i.picsum.photos',
-    'upload.wikimedia.org', 'commons.wikimedia.org', 'thumb.wikimedia.org'
+    // ويكيميديا كومنز
+    'upload.wikimedia.org', 'commons.wikimedia.org', 'thumb.wikimedia.org',
+    // Openverse (صور برخص مشاع إبداعي)
+    'api.openverse.org'
   ];
 
   /** يمنع خروج أي طلب إلى نطاق خارج المصادر المسموح بها أو موقعنا */
   function assertAllowed(url) {
-    // صور مضمّنة (data:) — تُستخدم في المعاينة المستقلة فقط
-    if (/^data:/i.test(url)) return url;
-    // مسارات داخلية من نفس الموقع (مجلد الصور المحلي)
-    if (!/^https?:/i.test(url)) return url;
+    if (/^data:/i.test(url)) return url;        // صور مضمّنة (المعاينة المستقلة)
+    if (!/^https?:/i.test(url)) return url;     // مسار داخلي من نفس الموقع
 
     const h = new URL(url).hostname;
     const ours = location.hostname;
@@ -95,10 +99,8 @@
     return url;
   }
 
-  /** يمرّر الرابط عبر دالة الخادم إن كان التمرير مُفعّلاً، وإلا يرجعه كما هو */
   function viaProxy(url) {
     assertAllowed(url);
-    // لا نمرّر البيانات المضمّنة ولا الملفات المحلية
     if (!CFG.useProxy || /^data:/i.test(url) || !/^https?:/i.test(url)) return url;
     return '/api/img?u=' + encodeURIComponent(url);
   }
@@ -109,15 +111,15 @@
     return '/api/data?u=' + encodeURIComponent(url);
   }
 
-  async function fetchJSON(url, opts) {
-    const res = await fetch(url, opts || {});
+  async function fetchJSON(url) {
+    const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const text = await res.text();
-    return JSON.parse(text);   // يفشل بوضوح لو رجع نص غير JSON
+    return JSON.parse(text);
   }
 
   /* ---------- ذاكرة مؤقتة في المتصفح (اختيارية) ---------- */
-  const CACHE_PREFIX = 'randomImageSite:v2:';
+  const CACHE_PREFIX = 'randomImageSite:v3:';
 
   function readCache(key, hours) {
     try {
@@ -137,7 +139,7 @@
   }
 
   /* ============================================================
-     المصادر — كل مصدر يُرجع: [{ url, credit }]
+     المصادر — كل مصدر يُرجع: [{ url, credit, live? }]
      ============================================================ */
 
   const SOURCES = {
@@ -147,19 +149,14 @@
       label: 'Picsum',
       cacheKey: 'picsum',
 
-      size: () => `${CFG.picsum.width}/${CFG.picsum.height}`,
-
-      /** رابط صورة معيّنة بالمعرّف */
-      imageUrl(id) {
-        const { width, height, format } = CFG.picsum;
-        const ext = format === 'webp' ? '.webp' : '';
-        return `https://picsum.photos/id/${id}/${width}/${height}${ext}`;
-      },
-
-      /** صورة عشوائية فورية من نفس المصدر (احتياطية فقط) */
-      emergencyUrl() {
+      nextUrl() {
         const { width, height } = CFG.picsum;
         return `https://picsum.photos/${width}/${height}?random=${Math.floor(Math.random() * 1e6)}`;
+      },
+
+      imageUrl(id) {
+        const { width, height, format } = CFG.picsum;
+        return `https://picsum.photos/id/${id}/${width}/${height}${format === 'webp' ? '.webp' : ''}`;
       },
 
       async load() {
@@ -172,12 +169,8 @@
         for (let page = 1; page <= pages; page++) {
           const api = `https://picsum.photos/v2/list?page=${page}&limit=${limitPerPage}`;
           let data;
-          try {
-            data = await fetchJSON(viaProxyData(api));
-          } catch (e) {
-            console.warn('توقف جلب الصفحة ' + page + ':', e.message);
-            break;
-          }
+          try { data = await fetchJSON(viaProxyData(api)); }
+          catch (e) { console.warn('توقف جلب الصفحة ' + page + ':', e.message); break; }
           if (!Array.isArray(data) || !data.length) break;
 
           for (const it of data) {
@@ -187,10 +180,74 @@
               credit: it.author ? '© ' + it.author + ' · Unsplash' : 'Unsplash'
             });
           }
-          await wait(60);   // لطفاً بالمصدر
+          await wait(60);
         }
 
         if (list.length) writeCache(this.cacheKey, list);
+        return list;
+      }
+    },
+
+    /* ---------- Openverse: ملايين الصور برخص حرة (Flickr + متاحف + أرشيفات) ---------- */
+    openverse: {
+      label: 'Openverse',
+
+      nextUrl() {
+        const { queries, license, useThumbnail } = CFG.openverse;
+        const q = (queries && queries.length) ? queries[Math.floor(Math.random() * queries.length)] : 'landscape';
+        const p = new URLSearchParams({ q, page_size: '1' });
+        if (license) p.set('license', license);
+        return 'https://api.openverse.org/v1/images/?' + p.toString();
+      },
+
+      /** رابط الصورة نفسها (مصغّرة أو كاملة) */
+      imageUrl(r) {
+        const thumb = r.thumbnail || r.url;
+        if (!thumb) return null;
+        if (CFG.openverse.useThumbnail && /api\.openverse\.org/.test(thumb)) {
+          return thumb + (thumb.includes('?') ? '&' : '?') + 'full_size=true';
+        }
+        return thumb;
+      },
+
+      async load() {
+        const cached = readCache('openverse', CFG.openverse.cacheHours);
+        if (cached) return cached;
+
+        const list = [];
+        const { queries, pagesPerQuery, pageSize, license } = CFG.openverse;
+
+        for (const q of queries) {
+          for (let page = 1; page <= pagesPerQuery; page++) {
+            const params = { q, page: String(page), page_size: String(pageSize) };
+            if (license) params.license = license;
+
+            let data;
+            try {
+              data = await fetchJSON(viaProxyData('https://api.openverse.org/v1/images/?' + new URLSearchParams(params).toString()));
+            } catch (e) { console.warn('تعذّر جلب', q, e.message); break; }
+
+            const results = (data && data.results) || [];
+            if (!results.length) break;
+
+            for (const r of results) {
+              if (!r || r.mature) continue;               // تجاهل المحتوى غير المناسب
+              const url = this.imageUrl(r);
+              if (!url) continue;
+
+              const lic = [r.license, r.license_version].filter(Boolean).join(' ').toUpperCase();
+              const parts = [];
+              if (r.creator) parts.push('© ' + r.creator);
+              if (lic) parts.push(lic);
+              if (r.source) parts.push(r.source);
+
+              list.push({ url, credit: parts.join(' · ') });
+            }
+            await wait(300);   // احترام حدود الطلبات (20 طلباً في الدقيقة)
+          }
+        }
+
+        if (list.length) writeCache('openverse', list);
         return list;
       }
     },
@@ -229,10 +286,7 @@
             let data;
             try {
               data = await fetchJSON(viaProxyData('https://commons.wikimedia.org/w/api.php?' + new URLSearchParams(params).toString()));
-            } catch (e) {
-              console.warn('تعذّر جلب التصنيف:', cat, e.message);
-              break;
-            }
+            } catch (e) { console.warn('تعذّر جلب التصنيف:', cat, e.message); break; }
 
             const pages = (data && data.query && data.query.pages) || {};
             for (const p of Object.values(pages)) {
@@ -273,6 +327,34 @@
           .filter((p) => typeof p === 'string' && p.trim())
           .map((p, i) => ({ url: p, credit: credits[i] || baseName(p) }));
       }
+    },
+
+    /* ---------- توليد صور بالذكاء الاصطناعي (يحتاج مفتاحاً على السيرفر) ---------- */
+    ai: {
+      label: 'صور مولّدة بالذكاء الاصطناعي',
+
+      /** وصف عشوائي من القائمة الكبيرة → رابط توليد جديد */
+      nextUrl() {
+        const prompts = (CFG.ai.prompts && CFG.ai.prompts.length)
+          ? CFG.ai.prompts
+          : ['a beautiful landscape'];
+        const prompt = prompts[Math.floor(Math.random() * prompts.length)] + (CFG.ai.style || '');
+
+        const q = new URLSearchParams({
+          prompt,
+          width: String(CFG.ai.width),
+          height: String(CFG.ai.height),
+          seed: String(Math.floor(Math.random() * 1e9))
+        });
+        if (CFG.ai.negativePrompt) q.set('negative', CFG.ai.negativePrompt);
+
+        return '/api/ai?' + q.toString();
+      },
+
+      /** في هذا المصدر: كل ضغطة = صورة جديدة تُولَّد الآن */
+      async load() {
+        return [{ url: this.nextUrl(), credit: 'مولّدة بالذكاء الاصطناعي', live: true }];
+      }
     }
   };
 
@@ -297,8 +379,8 @@
       }
 
       // صورة احتياطية واحدة من نفس المصدر — الزر لا يتوقف أبداً
-      if (!list.length && CFG.allowEmergencyImage && typeof src.emergencyUrl === 'function') {
-        list = [{ url: src.emergencyUrl(), credit: src.label, emergency: true }];
+      if (!list.length && CFG.allowEmergencyImage && typeof src.nextUrl === 'function') {
+        list = [{ url: src.nextUrl(), credit: src.label, live: true }];
       }
 
       items = list;
@@ -312,7 +394,8 @@
       }
 
       ready = true;
-      setMsg('المصدر: ' + src.label + ' — عدد الصور المتاحة: ' + items.length, 'ok');
+      const count = items[0] && items[0].live ? 'توليد مباشر' : items.length + ' صورة';
+      setMsg('المصدر: ' + src.label + ' — ' + count, 'ok');
       return items;
     })();
 
@@ -348,11 +431,7 @@
     // 1) القائمة
     if (!ready || !items.length) {
       const list = await ensureList();
-      if (!list.length) {
-        // نحاول مرة أخرى في الضغطة التالية
-        ready = false;
-        return;
-      }
+      if (!list.length) { ready = false; return; }
     }
 
     const src = currentSource();
@@ -362,9 +441,9 @@
     let item = items[i];
     lastIndex = i;
 
-    // في الوضع الاحتياطي: نطلب صورة جديدة في كل ضغطة
-    if (item.emergency && typeof src.emergencyUrl === 'function') {
-      item = { url: src.emergencyUrl(), credit: src.label, emergency: true };
+    // في المصادر المباشرة (توليد/احتياطي): رابط جديد في كل ضغطة — من نفس المصدر
+    if (item.live && typeof src.nextUrl === 'function') {
+      item = { url: src.nextUrl(), credit: item.credit || src.label, live: true };
       items[i] = item;
     }
 
@@ -375,28 +454,29 @@
     spinner(true);
     setMsg('');
 
+    const target = viaProxy(item.url);
+
     // 3) الجلب والعرض
     try {
-      await preload(viaProxy(item.url));
-    } catch (e) {
-      // محاولة واحدة إضافية قبل الاستسلام
-      try { await preload(viaProxy(item.url)); }
+      await preload(target);
+    } catch {
+      try { await preload(target); }        // محاولة ثانية
       catch {
         spinner(false);
         setMsg('تعذّر تحميل الصورة من المصدر «' + src.label + '». جرّب مرة أخرى.', 'err');
-        if (!item.emergency) { items.splice(i, 1); lastIndex = -1; }
+        if (!item.live) { items.splice(i, 1); lastIndex = -1; }
         if (items.length) releaseButton('حاول مرة أخرى');
         else { ready = false; releaseButton('إعادة المحاولة'); }
         return;
       }
     }
 
-    img.src = viaProxy(item.url);
+    img.src = target;
     img.alt = item.credit || 'صورة عشوائية';
     img.onload = () => spinner(false);
     spinner(false);
 
-    const pos = item.emergency ? '' : ' — (' + (i + 1) + ' من ' + items.length + ')';
+    const pos = (item.live || items.length === 1) ? '' : ' — (' + (i + 1) + ' من ' + items.length + ')';
     meta.textContent = (item.credit || '') + pos + ' · المصدر: ' + src.label;
     releaseButton('صورة أخرى');
     img.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -407,7 +487,5 @@
      ============================================================ */
 
   btn.addEventListener('click', showRandomImage);
-
-  // تحميل القائمة مسبقاً حتى تكون أول ضغطة سريعة
   ensureList();
 })();
