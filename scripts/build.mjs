@@ -19,7 +19,7 @@ console.log('→ تجهيز مجلد المخرجات public/ ...');
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
 
-const STATIC_FILES = ['index.html', 'styles.css', 'config.js', 'app.js', 'images.json', 'robots.txt', '.nojekyll'];
+const STATIC_FILES = ['index.html', 'styles.css', 'config.js', 'app.js', 'images.json', 'gallery.json', 'robots.txt', '.nojekyll'];
 
 for (const file of STATIC_FILES) {
   const src = join(ROOT, file);

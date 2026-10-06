@@ -8,7 +8,8 @@
 const ALLOWED_HOSTS = new Set([
   'picsum.photos',
   'commons.wikimedia.org',
-  'api.openverse.org'
+  'api.openverse.org',
+  'user-uploads.perchance.org'
 ]);
 
 const MAX_BYTES = 3 * 1024 * 1024;

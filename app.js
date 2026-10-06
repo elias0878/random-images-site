@@ -17,6 +17,7 @@
     openverse: { queries: [], pageSize: 20, pagesPerQuery: 1, license: '', useThumbnail: true, cacheHours: 24 },
     wikimedia: { width: 1200, limitPerPage: 50, roundsPerCategory: 3, cacheHours: 12, categories: [] },
     folder: { indexFile: 'images.json' },
+    gallery: { file: 'gallery.json' },
     ai: { style: '', width: 1200, height: 750, negativePrompt: '', prompts: [] }
   };
 
@@ -81,7 +82,9 @@
     // ويكيميديا كومنز
     'upload.wikimedia.org', 'commons.wikimedia.org', 'thumb.wikimedia.org',
     // Openverse (صور برخص مشاع إبداعي)
-    'api.openverse.org'
+    'api.openverse.org',
+    // Perchance: روابط الصور التي تختارها بنفسك في gallery.json
+    'user-uploads.perchance.org'
   ];
 
   /** يمنع خروج أي طلب إلى نطاق خارج المصادر المسموح بها أو موقعنا */
@@ -326,6 +329,18 @@
         return arr
           .filter((p) => typeof p === 'string' && p.trim())
           .map((p, i) => ({ url: p, credit: credits[i] || baseName(p) }));
+      }
+    },
+
+    /* ---------- معرضي الخاص: روابط مختارة في gallery.json ---------- */
+    gallery: {
+      label: 'معرضي',
+
+      async load() {
+        const data = await fetchJSON(CFG.gallery.file + '?v=' + Math.floor(Date.now() / 3600e3));
+        const arr = (Array.isArray(data) ? data : (data.images || []))
+          .filter((u) => typeof u === 'string' && /^https?:\/\//i.test(u.trim()));
+        return arr.map((u) => ({ url: u.trim(), credit: baseName(u) }));
       }
     },
 

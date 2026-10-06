@@ -20,7 +20,9 @@ const ALLOWED_HOSTS = new Set([
   'commons.wikimedia.org',
   'thumb.wikimedia.org',
   // Openverse (صور برخص مشاع إبداعي)
-  'api.openverse.org'
+  'api.openverse.org',
+  // Perchance: روابط الصور التي يوفّرها صاحب الموقع بنفسه من معرضه
+  'user-uploads.perchance.org'
 ]);
 
 const MAX_BYTES = 6 * 1024 * 1024;   // حد أقصى لحجم الصورة
