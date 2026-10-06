@@ -51,14 +51,24 @@ export default async function handler(req, res) {
     return;
   }
 
+  const HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (compatible; random-images-site/1.0)',
+    'Accept': 'image/avif,image/webp,image/jpeg,image/png,image/*;q=0.8'
+  };
+
+  const grab = (u) => fetch(u, { redirect: 'follow', headers: HEADERS });
+
   try {
-    const upstream = await fetch(target.toString(), {
-      redirect: 'follow',
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; random-images-site/1.0)',
-        'Accept': 'image/avif,image/webp,image/jpeg,image/png,image/*;q=0.8'
-      }
-    });
+    let upstream = await grab(target.toString());
+
+    // تراجع تلقائي: بعض المصادر ترفض الطلب مع معاملات الاستعلام
+    // (مثال: Openverse ترفض full_size من بعض السيرفرات) — نجرب بلا معاملات.
+    if (!upstream.ok && target.search) {
+      const bare = new URL(target.toString());
+      bare.search = '';
+      const alt = await grab(bare.toString());
+      if (alt.ok) upstream = alt;
+    }
 
     if (!upstream.ok) {
       res.status(502).json({ error: 'المصدر أرجع ' + upstream.status });
