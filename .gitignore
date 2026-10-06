@@ -1,23 +1,5 @@
-# ملفات مؤقتة
 node_modules/
-public/
 .DS_Store
-Thumbs.db
-desktop.ini
 *.log
-.vercel
 .env
-.env.*
-
-# كاش المضغوطات
-*.zip
-*.rar
-*.7z
-!images/**
-
-# النسخ الأصلية للصور قبل التحسين
-images_original/
-
-# ملفات بايثون المؤقتة
-__pycache__/
-*.pyc
+.vercel

@@ -1,40 +1,83 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>صور عشوائية</title>
-  <meta name="description" content="زر واحد يفتح لك صورة عشوائية" />
-  <meta name="theme-color" content="#0b0d12" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='78' font-size='80'%3E%F0%9F%96%BC%EF%B8%8F%3C/text%3E%3C/svg%3E" />
-  <link rel="stylesheet" href="styles.css" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>أدوات سريعة — 149 أداة تعمل داخل متصفحك</title>
+<meta name="description" content="مجموعة أدوات عربية تعمل كلها داخل المتصفح: تعديل الصور، قياس المسافات، ترجمة، نصوص، مبرمجون، محوّلات، حاسبات ووقت — مجاناً وبلا تسجيل.">
+<meta name="theme-color" content="#0d1117">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧰</text></svg>">
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main class="wrap">
+<header class="top">
+  <div class="wrap top-in">
+    <a class="brand" href="#/" id="brand">
+      <span class="brand-ico">🧰</span>
+      <span class="brand-txt"><b>أدوات سريعة</b><small id="brand-sub">كل المعالجة داخل متصفحك</small></span>
+    </a>
 
-    <header class="head">
-      <h1 class="title">صور عشوائية</h1>
-      <p class="sub">اضغط الزر لتظهر لك صورة عشوائية</p>
-    </header>
+    <div class="search-box">
+      <input id="search" type="search" placeholder="ابحث عن أداة… (مثال: قص صورة، نسبة، ترجمة، هاش)" autocomplete="off" aria-label="ابحث عن أداة">
+      <kbd>/</kbd>
+    </div>
 
-    <button id="openBtn" class="btn" type="button">
-      <span class="btn-ico" aria-hidden="true">🖼️</span>
-      <span id="btnText">فتح الصورة</span>
-    </button>
+    <button id="theme" class="icon-btn" type="button" title="تبديل المظهر (فاتح/داكن)">🌗</button>
+  </div>
+</header>
 
-    <section id="stage" class="stage" hidden>
-      <div class="frame">
-        <img id="img" class="img" alt="صورة عشوائية" decoding="async" />
-        <div id="loader" class="loader" hidden><span></span></div>
+<nav class="cats wrap" id="cats" aria-label="التصنيفات"></nav>
+
+<main class="wrap" id="main">
+  <section id="home">
+    <div id="recent-box" class="recent" hidden>
+      <span class="recent-label">🕘 استخدمتها مؤخراً:</span>
+      <span id="recent-list"></span>
+    </div>
+    <div class="hero" id="hero">
+      <h1><span id="count">149</span> أداة عربية تعمل فعلياً — بلا تسجيل وبلا رفع ملفاتك</h1>
+      <p>تعديل الصور والقياس والترجمة والنصوص والبرمجة والمحوّلات والحاسبات والوقت. اختر أداة أو ابحث أعلاه.</p>
+    </div>
+    <div id="grid" class="grid cards"></div>
+    <p id="empty" class="empty" hidden>لا توجد نتائج مطابقة — جرّب كلمة أخرى.</p>
+  </section>
+
+  <section id="tool" hidden>
+    <div class="tool-head">
+      <button class="btn ghost" id="back" type="button">← رجوع</button>
+      <div class="tool-title">
+        <h2 id="t-title">—</h2>
+        <p id="t-desc">—</p>
       </div>
-      <p id="meta" class="meta"></p>
-    </section>
+      <div class="tool-actions">
+        <button class="icon-btn" id="fav" type="button" title="أضف إلى المفضلة">☆</button>
+        <button class="icon-btn" id="link" type="button" title="انسخ رابط الأداة">🔗</button>
+      </div>
+    </div>
+    <div id="tool-body" class="tool-body"></div>
+  </section>
+</main>
 
-    <p id="msg" class="msg" role="status" aria-live="polite"></p>
+<footer class="foot wrap">
+  <p>
+    <b>أدوات سريعة</b> — <span id="foot-count">149</span> أداة تعمل كلها داخل متصفحك: ملفاتك وصورك لا تُرفع إلى أي خادم.
+    الأدوات التي تحتاج إنترنت (الترجمة وأسعار الصرف) تمرّ عبر وسيط الموقع نفسه.
+  </p>
+  <p class="muted">لا تسجيل دخول · لا إعلانات · لا تتبّع · مفتوح المصدر على <a href="https://github.com/elias0878/random-images-site" target="_blank" rel="noopener">GitHub</a></p>
+</footer>
 
-  </main>
+<div id="toast-host"></div>
 
-  <script src="config.js"></script>
-  <script src="app.js"></script>
+<!-- المحرّك أولاً ثم كل ملفات الأدوات ثم الراوتر -->
+<script src="js/ui.js"></script>
+<script src="js/tools/text.js"></script>
+<script src="js/tools/code.js"></script>
+<script src="js/tools/convert.js"></script>
+<script src="js/tools/calc.js"></script>
+<script src="js/tools/image.js"></script>
+<script src="js/tools/lang.js"></script>
+<script src="js/tools/measure.js"></script>
+<script src="js/tools/time.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>

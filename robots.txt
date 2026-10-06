@@ -1,5 +1,2 @@
 User-agent: *
 Allow: /
-
-# لا حاجة لأرشفة محتوى الصور
-Disallow: /images/

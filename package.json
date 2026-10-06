@@ -1,14 +1,14 @@
 {
-  "name": "random-images-site",
+  "name": "quick-tools-ar",
   "version": "1.0.0",
   "private": true,
-  "description": "موقع بسيط: زر واحد يفتح صورة عشوائية من مجلد images",
-  "type": "module",
+  "description": "أدوات سريعة — 155 أداة عربية تعمل داخل المتصفح (صور، قياس، ترجمة، نصوص، برمجة، محوّلات، حاسبات، وقت)",
   "scripts": {
-    "build": "node scripts/build.mjs",
-    "index": "node scripts/build-index.mjs",
-    "start": "node scripts/serve.mjs",
-    "dev": "node scripts/build-index.mjs && node scripts/serve.mjs"
+    "serve": "node test/serve.js",
+    "test": "node test/smoke.js"
+  },
+  "devDependencies": {
+    "jsdom": "^24.0.0"
   },
   "engines": {
     "node": ">=18"
