@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://random-images-site.vercel.app/sitemap.xml
